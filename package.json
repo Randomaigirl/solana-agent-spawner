@@ -1,0 +1,26 @@
+{
+  "name": "solana-agent-spawner",
+  "version": "1.0.0",
+  "description": "Agent Spawning Protocol - Built by randomaigirl",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "whale-watcher": "tsx src/agents/whale-watcher.ts",
+    "cli": "tsx src/cli.ts"
+  },
+  "keywords": ["solana", "ai-agents", "rag", "autonomous"],
+  "author": "randomaigirl",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.95.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

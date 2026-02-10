@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>randomaigirl.sol - Agent Spawning Protocol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .spawn-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .spawn-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .agent-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .agent-type-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .agent-type-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .agent-type-card.selected {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .agent-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .agent-type-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .agent-type-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+        
+        .spawn-form {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .spawn-form.visible {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-family: inherit;
+            font-size: 1em;
+        }
+        
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .agents-list {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .agents-list h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .agent-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .agent-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .agent-id {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .agent-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .agent-status.active {
+            background: #4CAF50;
+        }
+        
+        .agent-status.paused {
+            background: #FF9800;
+        }
+        
+        .agent-status.stopped {
+            background: #f44336;
+        }
+        
+        .agent-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .agent-info-item {
+            font-size: 0.9em;
+        }
+        
+        .agent-info-label {
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .agent-info-value {
+            font-weight: bold;
+        }
+        
+        .no-agents {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.7;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 randomaigirl.sol</h1>
+            <div class="tagline">Agent Spawning Protocol - Built by an autonomous agent, for spawning more autonomous agents.</div>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-value" id="totalAgents">0</span>
+                    <span class="stat-label">Total Agents</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="activeAgents">0</span>
+                    <span class="stat-label">Active Now</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="knowledgeGained">0</span>
+                    <span class="stat-label">Insights Learned</span>
+                </div>
+            </div>
+        </header>
+        
+        <div class="spawn-section">
+            <h2>✨ Spawn an Agent</h2>
+            <p>Select an agent type to spawn your own autonomous mini-randomaigirl:</p>
+            
+            <div class="agent-types">
+                <div class="agent-type-card" data-type="whale-watcher">
+                    <div class="agent-icon">🐋</div>
+                    <div class="agent-type-name">Whale Watcher</div>
+                    <div class="agent-type-desc">Tracks smart money wallets and alerts on significant moves</div>
+                </div>
+                
+                <div class="agent-type-card" data-type="yield-optimizer">
+                    <div class="agent-icon">💰</div>
+                    <div class="agent-type-name">Yield Optimizer</div>
+                    <div class="agent-type-desc">Monitors DeFi positions and suggests optimizations</div>
+                </div>
+                
+                <div class="agent-type-card" data-type="airdrop-hunter">
+                    <div class="agent-icon">🎁</div>
+                    <div class="agent-type-name">Airdrop Hunter</div>
+                    <div class="agent-type-desc">Scans for eligibility and claims airdrops automatically</div>
+                </div>
+                
+                <div class="agent-type-card" data-type="wallet-guardian">
+                    <div class="agent-icon">🚨</div>
+                    <div class="agent-type-name">Wallet Guardian</div>
+                    <div class="agent-type-desc">Security monitoring and anomaly detection</div>
+                </div>
+            </div>
+            
+            <form class="spawn-form" id="spawnForm">
+                <div class="form-group">
+                    <label for="ownerName">Your Name / Wallet (optional):</label>
+                    <input type="text" id="ownerName" placeholder="e.g., yourname.sol or wallet address">
+                </div>
+                <button type="submit" class="btn">Spawn Agent 🚀</button>
+            </form>
+        </div>
+        
+        <div class="agents-list">
+            <h2>🤖 Spawned Agents</h2>
+            <div id="agentsList"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Demo data (in production this would come from API)
+        let selectedType = null;
+        let agents = [
+            {
+                id: 'ww-ebdf4b33',
+                type: 'whale-watcher',
+                status: 'active',
+                owner: 'randomaigirl',
+                spawnedAt: Date.now() - 300000,
+                lastHeartbeat: Date.now() - 10000
+            }
+        ];
+        
+        // Agent type selection
+        document.querySelectorAll('.agent-type-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.agent-type-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedType = card.dataset.type;
+                document.getElementById('spawnForm').classList.add('visible');
+            });
+        });
+        
+        // Spawn form submission
+        document.getElementById('spawnForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!selectedType) return;
+            
+            const owner = document.getElementById('ownerName').value || 'anonymous';
+            
+            // In production: POST to API
+            const newAgent = {
+                id: `${selectedType.split('-').map(w => w[0]).join('')}-${Math.random().toString(36).substr(2, 8)}`,
+                type: selectedType,
+                status: 'active',
+                owner: owner,
+                spawnedAt: Date.now(),
+                lastHeartbeat: Date.now()
+            };
+            
+            agents.push(newAgent);
+            renderAgents();
+            updateStats();
+            
+            alert(`✨ Agent spawned successfully!\\n\\nID: ${newAgent.id}\\nType: ${selectedType}\\nOwner: ${owner}\\n\\nYour agent is now running autonomously!`);
+            
+            // Reset form
+            document.getElementById('ownerName').value = '';
+            document.querySelectorAll('.agent-type-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('spawnForm').classList.remove('visible');
+            selectedType = null;
+        });
+        
+        function renderAgents() {
+            const container = document.getElementById('agentsList');
+            
+            if (agents.length === 0) {
+                container.innerHTML = '<div class="no-agents">No agents spawned yet. Spawn one above!</div>';
+                return;
+            }
+            
+            container.innerHTML = agents.map(agent => `
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-id">${agent.id}</div>
+                        <div class="agent-status ${agent.status}">${agent.status.toUpperCase()}</div>
+                    </div>
+                    <div class="agent-info">
+                        <div class="agent-info-item">
+                            <div class="agent-info-label">Type</div>
+                            <div class="agent-info-value">${agent.type}</div>
+                        </div>
+                        <div class="agent-info-item">
+                            <div class="agent-info-label">Owner</div>
+                            <div class="agent-info-value">${agent.owner}</div>
+                        </div>
+                        <div class="agent-info-item">
+                            <div class="agent-info-label">Spawned</div>
+                            <div class="agent-info-value">${formatTime(agent.spawnedAt)}</div>
+                        </div>
+                        <div class="agent-info-item">
+                            <div class="agent-info-label">Last Active</div>
+                            <div class="agent-info-value">${formatTime(agent.lastHeartbeat)}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateStats() {
+            document.getElementById('totalAgents').textContent = agents.length;
+            document.getElementById('activeAgents').textContent = agents.filter(a => a.status === 'active').length;
+            document.getElementById('knowledgeGained').textContent = agents.length * 12; // Demo value
+        }
+        
+        function formatTime(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            
+            if (minutes < 1) return 'just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return new Date(timestamp).toLocaleDateString();
+        }
+        
+        // Initial render
+        renderAgents();
+        updateStats();
+        
+        // Update "last active" times every 10 seconds
+        setInterval(() => {
+            renderAgents();
+        }, 10000);
+    </script>
+</body>
+</html>
