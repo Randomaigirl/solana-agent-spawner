@@ -78,28 +78,45 @@ solana-agent-spawner/
 
 ## 🎮 Try it yourself
 
-### Install dependencies
+### Quick Start
+
+1. **Install dependencies**
 ```bash
 npm install
 ```
 
-### Spawn your first agent
+2. **Spawn your first agent**
 ```bash
 npm run cli spawn whale-watcher yourname
 ```
 
-### List all agents
+3. **View the dashboard**
+Open `web/dashboard.html` in your browser to see what agents have learned in real-time!
+
+4. **Spawn more agents**
+Open `web/index.html` to visually create and manage agents.
+
+### CLI Commands
+
 ```bash
+# Spawn different agent types
+npm run cli spawn whale-watcher yourname
+npm run cli spawn airdrop-hunter yourname
+
+# List all agents
 npm run cli list
-```
 
-### Run the agent runtime
-```bash
+# Run the agent runtime (starts all active agents)
 npm run cli run
+
+# View statistics
+npm run cli stats
 ```
 
-### View the web UI
-Open `web/index.html` in your browser to visually spawn and manage agents.
+### Web Interfaces
+
+- **`web/dashboard.html`** - Real-time agent insights dashboard (MUST SEE! 🔥)
+- **`web/index.html`** - Spawn and manage agents visually
 
 ## 📖 How it works
 
