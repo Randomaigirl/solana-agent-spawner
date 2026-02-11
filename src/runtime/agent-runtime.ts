@@ -4,6 +4,7 @@
 
 import { BaseAgent, AgentConfig } from '../types/agent.js';
 import { WhaleWatcherAgent } from '../agents/whale-watcher.js';
+import { AirdropHunterAgent } from '../agents/airdrop-hunter.js';
 import { AgentRegistry } from '../registry/agent-registry.js';
 
 export class AgentRuntime {
@@ -165,9 +166,11 @@ export class AgentRuntime {
       case 'whale-watcher':
         return new WhaleWatcherAgent(config);
       
+      case 'airdrop-hunter':
+        return new AirdropHunterAgent(config);
+      
       // TODO: Add more agent types
       case 'yield-optimizer':
-      case 'airdrop-hunter':
       case 'wallet-guardian':
         throw new Error(`Agent type ${config.type} not yet implemented`);
       
