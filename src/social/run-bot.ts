@@ -4,6 +4,7 @@
  * Starts @randomaigirl's autonomous Twitter presence
  */
 
+import 'dotenv/config';
 import { TWITTER_BOT } from './twitter-bot.js';
 import { GLOBAL_RAG } from '../rag/knowledge-store.js';
 
@@ -15,6 +16,11 @@ async function main() {
   console.log('📚 Initializing knowledge base...');
   await GLOBAL_RAG.initialize();
   console.log('✅ Knowledge base ready\n');
+
+  // Initialize Twitter client
+  console.log('🐦 Initializing Twitter client...');
+  await TWITTER_BOT.initialize();
+  console.log('✅ Twitter client ready\n');
 
   // Start the bot
   await TWITTER_BOT.start();

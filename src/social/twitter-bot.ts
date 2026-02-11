@@ -6,6 +6,7 @@
  */
 
 import { GLOBAL_RAG } from '../rag/knowledge-store.js';
+import { createTwitterClient, TwitterClient } from './twitter-client.js';
 
 interface Tweet {
   id: string;
@@ -15,12 +16,22 @@ interface Tweet {
 }
 
 export class TwitterBot {
+  private client: TwitterClient;
   private lastCheckTime: Date;
   private processedTweets: Set<string>;
+  private lastMentionId: string | undefined;
 
   constructor() {
+    this.client = createTwitterClient();
     this.lastCheckTime = new Date();
     this.processedTweets = new Set();
+  }
+
+  /**
+   * Initialize the bot
+   */
+  async initialize() {
+    await this.client.initialize();
   }
 
   /**
@@ -42,14 +53,26 @@ export class TwitterBot {
    */
   private async checkMentions() {
     try {
-      // TODO: Integrate with actual Twitter API
-      // For now, simulate checking mentions
-      const mentions = await this.getMentions();
+      const mentions = await this.client.getMentions(this.lastMentionId);
+
+      if (mentions.length === 0) {
+        return;
+      }
+
+      // Update last mention ID for pagination
+      this.lastMentionId = mentions[0].id;
 
       for (const mention of mentions) {
         if (this.processedTweets.has(mention.id)) continue;
 
-        await this.handleMention(mention);
+        const tweet: Tweet = {
+          id: mention.id,
+          text: mention.text,
+          author: mention.username || 'unknown',
+          timestamp: new Date(mention.created_at)
+        };
+
+        await this.handleMention(tweet);
         this.processedTweets.add(mention.id);
       }
     } catch (error) {
@@ -148,40 +171,14 @@ export class TwitterBot {
    * Post a proactive tweet
    */
   async tweet(text: string) {
-    console.log(`\n🐦 Tweeting: "${text}"\n`);
-    // TODO: Integrate with actual Twitter API
-    // For now, just log
-    await this.simulateTwitterAPI('POST', '/tweets', { text });
+    await this.client.tweet(text);
   }
 
   /**
    * Reply to a tweet
    */
   private async reply(tweetId: string, text: string) {
-    console.log(`\n💬 Replying to ${tweetId}: "${text}"\n`);
-    // TODO: Integrate with actual Twitter API
-    await this.simulateTwitterAPI('POST', '/tweets', {
-      text,
-      reply: { in_reply_to_tweet_id: tweetId }
-    });
-  }
-
-  /**
-   * Get recent mentions
-   */
-  private async getMentions(): Promise<Tweet[]> {
-    // TODO: Integrate with actual Twitter API
-    // For now, return empty array (will integrate with real API)
-    return [];
-  }
-
-  /**
-   * Simulate Twitter API calls (placeholder for real implementation)
-   */
-  private async simulateTwitterAPI(method: string, endpoint: string, data?: any) {
-    // This will be replaced with actual Twitter API integration
-    // Using Twitter API v2 with OAuth 2.0
-    return { success: true };
+    await this.client.reply(tweetId, text);
   }
 
   /**
