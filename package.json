@@ -10,7 +10,8 @@
     "start": "node dist/index.js",
     "whale-watcher": "tsx src/agents/whale-watcher.ts",
     "cli": "tsx src/cli.ts",
-    "api": "tsx src/api/server.ts"
+    "api": "tsx src/api/server.ts",
+    "rag": "tsx src/api/rag-api.ts"
   },
   "keywords": ["solana", "ai-agents", "rag", "autonomous"],
   "author": "randomaigirl",
