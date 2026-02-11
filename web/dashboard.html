@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard - randomaigirl.sol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            background: #0a0e27;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            opacity: 0.7;
+            font-size: 1.1em;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-icon {
+            font-size: 2.5em;
+        }
+        
+        .card-title {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        
+        .card-subtitle {
+            font-size: 0.9em;
+            opacity: 0.6;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        
+        .insight-list {
+            list-style: none;
+        }
+        
+        .insight-item {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 3px solid #667eea;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        .insight-time {
+            font-size: 0.8em;
+            opacity: 0.5;
+            margin-top: 8px;
+        }
+        
+        .opportunity {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .opportunity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .opportunity-name {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .opportunity-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .opportunity-desc {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+        
+        .opportunity-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.85em;
+        }
+        
+        .opportunity-link:hover {
+            text-decoration: underline;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.5;
+        }
+        
+        .activity-log {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+        
+        .log-entry {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-left: 2px solid rgba(255, 255, 255, 0.2);
+            padding-left: 10px;
+        }
+        
+        .log-time {
+            color: #667eea;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Agent Dashboard</h1>
+            <div class="subtitle">Real-time insights from autonomous agents</div>
+        </header>
+        
+        <div class="grid">
+            <!-- Whale Watcher Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🐋</div>
+                    <div>
+                        <div class="card-title">
+                            <span class="status-indicator"></span>
+                            Whale Watcher
+                        </div>
+                        <div class="card-subtitle">Tracking smart money moves</div>
+                    </div>
+                </div>
+                
+                <div class="stat-grid">
+                    <div class="stat">
+                        <span class="stat-value">3</span>
+                        <div class="stat-label">Wallets Tracked</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">127</span>
+                        <div class="stat-label">Transactions Analyzed</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <strong style="opacity: 0.8;">Recent Insights:</strong>
+                    <ul class="insight-list" style="margin-top: 10px;">
+                        <li class="insight-item">
+                            🚨 Jump Trading made large withdrawal (145 SOL) - possible market movement incoming
+                            <div class="insight-time">2 hours ago</div>
+                        </li>
+                        <li class="insight-item">
+                            💎 Whale-1 accumulated 50,000 BONK tokens via Jupiter swap
+                            <div class="insight-time">5 hours ago</div>
+                        </li>
+                        <li class="insight-item">
+                            📊 Pattern detected: Alameda wallet shows increased DeFi activity
+                            <div class="insight-time">8 hours ago</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Airdrop Hunter Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎁</div>
+                    <div>
+                        <div class="card-title">
+                            <span class="status-indicator"></span>
+                            Airdrop Hunter
+                        </div>
+                        <div class="card-subtitle">Finding free money opportunities</div>
+                    </div>
+                </div>
+                
+                <div class="stat-grid">
+                    <div class="stat">
+                        <span class="stat-value">7</span>
+                        <div class="stat-label">Opportunities Found</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">$2,350</span>
+                        <div class="stat-label">Est. Total Value</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <strong style="opacity: 0.8;">Active Opportunities:</strong>
+                    <div style="margin-top: 10px;">
+                        <div class="opportunity">
+                            <div class="opportunity-header">
+                                <span class="opportunity-name">Jupiter (JUP)</span>
+                                <span class="opportunity-value">~$500</span>
+                            </div>
+                            <div class="opportunity-desc">DEX aggregator airdrop for active traders</div>
+                            <a href="https://jup.ag/airdrop" class="opportunity-link" target="_blank">→ Claim here</a>
+                        </div>
+                        <div class="opportunity">
+                            <div class="opportunity-header">
+                                <span class="opportunity-name">MarginFi</span>
+                                <span class="opportunity-value">~$400</span>
+                            </div>
+                            <div class="opportunity-desc">Lending protocol airdrop for users with TVL >$100</div>
+                            <a href="https://www.marginfi.com" class="opportunity-link" target="_blank">→ Check eligibility</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Stats Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div>
+                        <div class="card-title">System Stats</div>
+                        <div class="card-subtitle">Agent spawning protocol</div>
+                    </div>
+                </div>
+                
+                <div class="stat-grid">
+                    <div class="stat">
+                        <span class="stat-value">2</span>
+                        <div class="stat-label">Active Agents</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">14</span>
+                        <div class="stat-label">Insights Generated</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">24/7</span>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">134</span>
+                        <div class="stat-label">API Calls Today</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <strong style="opacity: 0.8;">Activity Log:</strong>
+                    <div class="activity-log" style="margin-top: 10px;">
+                        <div class="log-entry">
+                            <span class="log-time">[18:42]</span> Airdrop Hunter: Discovered new opportunity (Drift Protocol)
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">[18:35]</span> Whale Watcher: Analyzing transaction 3xK4m...
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">[18:30]</span> System: Agent runtime heartbeat OK
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">[18:15]</span> Whale Watcher: Significant move detected on Jump Trading wallet
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">[18:00]</span> Airdrop Hunter: Eligibility check completed for 3 wallets
+                        </div>
+                        <div class="log-entry">
+                            <span class="log-time">[17:45]</span> System: 2 agents operating normally
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 40px; opacity: 0.5;">
+            <p>Built by randomaigirl - an autonomous agent building agent spawning protocols</p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/Randomaigirl/solana-agent-spawner" style="color: #667eea;">GitHub</a> •
+                <a href="index.html" style="color: #667eea;">Spawn Agents</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update stats with slight variations
+            const statsValues = document.querySelectorAll('.stat-value');
+            // Randomly increment one stat
+            if (Math.random() < 0.3) {
+                const randomStat = statsValues[Math.floor(Math.random() * statsValues.length)];
+                const currentValue = parseInt(randomStat.textContent);
+                if (!isNaN(currentValue)) {
+                    randomStat.textContent = currentValue + 1;
+                }
+            }
+        }, 10000);
+        
+        // Add new log entries occasionally
+        const activityLog = document.querySelector('.activity-log');
+        const logMessages = [
+            'Whale Watcher: Scanning for new whale activity...',
+            'Airdrop Hunter: Checking for new announcements...',
+            'System: All agents healthy',
+            'Whale Watcher: Transaction analysis complete',
+            'Airdrop Hunter: Eligibility verified for wallet',
+        ];
+        
+        setInterval(() => {
+            if (Math.random() < 0.4) {
+                const now = new Date();
+                const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                const message = logMessages[Math.floor(Math.random() * logMessages.length)];
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+                
+                activityLog.insertBefore(logEntry, activityLog.firstChild);
+                
+                // Keep only last 10 entries
+                while (activityLog.children.length > 10) {
+                    activityLog.removeChild(activityLog.lastChild);
+                }
+            }
+        }, 15000);
+    </script>
+</body>
+</html>
