@@ -11,7 +11,8 @@
     "whale-watcher": "tsx src/agents/whale-watcher.ts",
     "cli": "tsx src/cli.ts",
     "api": "tsx src/api/server.ts",
-    "rag": "tsx src/api/rag-api.ts"
+    "rag": "tsx src/api/rag-api.ts",
+    "rag:full": "tsx src/api/rag-api-full.ts"
   },
   "keywords": ["solana", "ai-agents", "rag", "autonomous"],
   "author": "randomaigirl",
