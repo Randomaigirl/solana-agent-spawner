@@ -102,6 +102,8 @@ Open `web/index.html` to visually create and manage agents.
 # Spawn different agent types
 npm run cli spawn whale-watcher yourname
 npm run cli spawn airdrop-hunter yourname
+npm run cli spawn yield-optimizer yourname
+npm run cli spawn wallet-guardian yourname
 
 # List all agents
 npm run cli list
@@ -113,10 +115,24 @@ npm run cli run
 npm run cli stats
 ```
 
+### API Server (for real-time data)
+
+```bash
+# Start API server + all active agents
+npm run api
+```
+
+The API exposes:
+- `GET /api/health` - Health check
+- `GET /api/stats` - Agent statistics
+- `GET /api/knowledge` - Real-time insights from agents
+
 ### Web Interfaces
 
 - **`web/dashboard.html`** - Real-time agent insights dashboard (MUST SEE! 🔥)
 - **`web/index.html`** - Spawn and manage agents visually
+
+**Note:** For live data in the dashboard, run `npm run api` first, then open the dashboard.
 
 ## 📖 How it works
 

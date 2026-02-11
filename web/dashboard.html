@@ -339,7 +339,7 @@
                         <div class="stat-label">Active Agents</div>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">14</span>
+                        <span class="stat-value" id="insightsCount">0</span>
                         <div class="stat-label">Insights Generated</div>
                     </div>
                     <div class="stat">
@@ -347,8 +347,8 @@
                         <div class="stat-label">Uptime</div>
                     </div>
                     <div class="stat">
-                        <span class="stat-value">134</span>
-                        <div class="stat-label">API Calls Today</div>
+                        <span class="stat-value" id="apiCalls">0</span>
+                        <div class="stat-label">API Calls</div>
                     </div>
                 </div>
                 
@@ -388,48 +388,123 @@
     </div>
     
     <script>
-        // Simulate real-time updates
-        setInterval(() => {
-            // Update stats with slight variations
-            const statsValues = document.querySelectorAll('.stat-value');
-            // Randomly increment one stat
-            if (Math.random() < 0.3) {
-                const randomStat = statsValues[Math.floor(Math.random() * statsValues.length)];
-                const currentValue = parseInt(randomStat.textContent);
-                if (!isNaN(currentValue)) {
-                    randomStat.textContent = currentValue + 1;
+        const API_BASE = 'http://localhost:3000/api';
+        let lastKnowledgeCount = 0;
+        
+        // Fetch real-time data from API
+        async function fetchStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update stats
+                    document.getElementById('totalAgents').textContent = result.data.totalAgents || 0;
+                    document.getElementById('activeAgents').textContent = result.data.activeAgents || 0;
+                }
+            } catch (error) {
+                console.error('Failed to fetch stats:', error);
+            }
+        }
+        
+        async function fetchKnowledge() {
+            try {
+                const response = await fetch(`${API_BASE}/knowledge`);
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    // Update insights count
+                    const totalInsights = result.data.reduce((sum, agent) => sum + agent.knowledge.length, 0);
+                    document.getElementById('insightsCount').textContent = totalInsights;
+                    
+                    // Add new knowledge to activity log
+                    if (totalInsights > lastKnowledgeCount) {
+                        addKnowledgeToLog(result.data);
+                        lastKnowledgeCount = totalInsights;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch knowledge:', error);
+            }
+        }
+        
+        function addKnowledgeToLog(agents) {
+            const activityLog = document.querySelector('.activity-log');
+            
+            for (const agent of agents) {
+                for (const knowledge of agent.knowledge.slice(-3)) { // Last 3 items
+                    const now = new Date(knowledge.timestamp);
+                    const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                    
+                    let message = '';
+                    if (agent.agentType === 'whale-watcher') {
+                        message = `Whale Watcher: ${knowledge.data.type || 'Activity detected'}`;
+                    } else if (agent.agentType === 'airdrop-hunter') {
+                        message = `Airdrop Hunter: ${knowledge.data.type || 'Opportunity found'}`;
+                    } else if (agent.agentType === 'yield-optimizer') {
+                        message = `Yield Optimizer: ${knowledge.data.type || 'Analysis complete'}`;
+                    } else if (agent.agentType === 'wallet-guardian') {
+                        message = `Wallet Guardian: ${knowledge.data.type || 'Security check'}`;
+                    } else {
+                        message = `${agent.agentType}: ${knowledge.source}`;
+                    }
+                    
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+                    
+                    // Add to top of log
+                    if (activityLog.firstChild) {
+                        activityLog.insertBefore(logEntry, activityLog.firstChild);
+                    } else {
+                        activityLog.appendChild(logEntry);
+                    }
+                    
+                    // Keep only last 20 entries
+                    while (activityLog.children.length > 20) {
+                        activityLog.removeChild(activityLog.lastChild);
+                    }
                 }
             }
+        }
+        
+        // Update API calls counter
+        let apiCalls = 0;
+        function incrementAPICalls() {
+            apiCalls++;
+            const elem = document.getElementById('apiCalls');
+            if (elem) elem.textContent = apiCalls;
+        }
+        
+        // Initial load
+        fetchStats();
+        fetchKnowledge();
+        
+        // Poll every 10 seconds
+        setInterval(() => {
+            fetchStats();
+            fetchKnowledge();
+            incrementAPICalls();
         }, 10000);
         
-        // Add new log entries occasionally
-        const activityLog = document.querySelector('.activity-log');
-        const logMessages = [
-            'Whale Watcher: Scanning for new whale activity...',
-            'Airdrop Hunter: Checking for new announcements...',
-            'System: All agents healthy',
-            'Whale Watcher: Transaction analysis complete',
-            'Airdrop Hunter: Eligibility verified for wallet',
-        ];
-        
-        setInterval(() => {
-            if (Math.random() < 0.4) {
-                const now = new Date();
-                const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-                const message = logMessages[Math.floor(Math.random() * logMessages.length)];
+        // Show connection status
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const result = await response.json();
                 
-                const logEntry = document.createElement('div');
-                logEntry.className = 'log-entry';
-                logEntry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
-                
-                activityLog.insertBefore(logEntry, activityLog.firstChild);
-                
-                // Keep only last 10 entries
-                while (activityLog.children.length > 10) {
-                    activityLog.removeChild(activityLog.lastChild);
+                if (result.success) {
+                    console.log('✅ Connected to agent runtime API');
+                    return true;
                 }
+            } catch (error) {
+                console.warn('⚠️  API server not running. Start with: npm run api');
+                console.warn('   Dashboard will show demo data until API is started.');
+                return false;
             }
-        }, 15000);
+        }
+        
+        checkConnection();
     </script>
 </body>
 </html>
