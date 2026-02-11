@@ -8,6 +8,9 @@
 import http from 'http';
 import { GLOBAL_RAG } from '../rag/knowledge-store.js';
 import { RAG_QUERY_EXAMPLES } from '../rag/agent-integration.js';
+import { BLOCKCHAIN_INDEXER } from '../rag/blockchain-indexer.js';
+import { TOKEN_TRACKER } from '../rag/token-tracker.js';
+import { AIRDROP_DETECTOR } from '../rag/airdrop-detector.js';
 
 const PORT = 3001;
 
@@ -114,6 +117,17 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({
         success: true,
         ...stats,
+        poweredBy: 'RandomAiGirl R-A-G'
+      }));
+      
+    } else if (url.pathname === '/api/rag/airdrops' && req.method === 'GET') {
+      // Get airdrop opportunities
+      const opportunities = AIRDROP_DETECTOR.getOpportunities();
+      
+      res.writeHead(200, corsHeaders);
+      res.end(JSON.stringify({
+        success: true,
+        opportunities,
         poweredBy: 'RandomAiGirl R-A-G'
       }));
       
@@ -236,27 +250,47 @@ async function getRequestBody(req: http.IncomingMessage): Promise<string> {
   });
 }
 
-server.listen(PORT, () => {
-  console.log('\n🧠 ========================================');
-  console.log('   RandomAiGirl R-A-G API Server');
-  console.log('   THE UNIVERSAL BLOCKCHAIN KNOWLEDGE LAYER');
-  console.log('========================================\n');
-  console.log(`✅ Server running on http://localhost:${PORT}\n`);
-  console.log('ENDPOINTS:');
-  console.log('  POST  /api/rag/query         Natural language queries');
-  console.log('  GET   /api/rag/wallet        Wallet intelligence');
-  console.log('  GET   /api/rag/protocol      Protocol intelligence');
-  console.log('  GET   /api/rag/market        Market intelligence');
-  console.log('  GET   /api/rag/stats         Knowledge stats');
-  console.log('  GET   /api/rag/examples      Usage examples');
-  console.log('  GET   /api/rag/health        Health check\n');
-  console.log('Try: curl http://localhost:3001/api/rag/examples\n');
-  console.log('The missing infrastructure layer for AI x Crypto');
-  console.log('Built by randomaigirl 💜\n');
-});
+async function startServer() {
+  // Start blockchain indexing
+  console.log('\n🔗 Starting blockchain indexers...');
+  await BLOCKCHAIN_INDEXER.start();
+  await TOKEN_TRACKER.start();
+  await AIRDROP_DETECTOR.start();
+  console.log('✅ Indexers running\n');
+  
+  server.listen(PORT, () => {
+    console.log('🧠 ========================================');
+    console.log('   RandomAiGirl R-A-G API Server');
+    console.log('   THE UNIVERSAL BLOCKCHAIN KNOWLEDGE LAYER');
+    console.log('========================================\n');
+    console.log(`✅ Server running on http://localhost:${PORT}\n`);
+    console.log('ENDPOINTS:');
+    console.log('  POST  /api/rag/query         Natural language queries');
+    console.log('  GET   /api/rag/wallet        Wallet intelligence');
+    console.log('  GET   /api/rag/protocol      Protocol intelligence');
+    console.log('  GET   /api/rag/market        Market intelligence');
+    console.log('  GET   /api/rag/airdrops      Airdrop opportunities');
+    console.log('  GET   /api/rag/stats         Knowledge stats');
+    console.log('  GET   /api/rag/examples      Usage examples');
+    console.log('  GET   /api/rag/health        Health check\n');
+    console.log('LIVE DATA SOURCES:');
+    console.log('  🐋 Monitoring 4 whale wallets');
+    console.log('  📊 Tracking 9 DeFi protocols');
+    console.log('  🪙 Following top tokens');
+    console.log('  ⛓️  Scanning live transactions\n');
+    console.log('Try: curl http://localhost:3001/api/rag/examples\n');
+    console.log('The missing infrastructure layer for AI x Crypto');
+    console.log('Built by randomaigirl 💜\n');
+  });
+}
+
+startServer().catch(console.error);
 
 process.on('SIGINT', () => {
   console.log('\n\n🛑 Shutting down RAG API...');
+  BLOCKCHAIN_INDEXER.stop();
+  TOKEN_TRACKER.stop();
+  AIRDROP_DETECTOR.stop();
   server.close();
   process.exit(0);
 });
