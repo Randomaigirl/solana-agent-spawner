@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RandomAiGirl RAG Playground 🔥</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.6s ease;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.1);
+      padding: 15px 25px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-value {
+      font-size: 2em;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+
+    .playground {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: fadeInUp 0.6s ease;
+      color: #333;
+    }
+
+    .question-input {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.1em;
+      border: 2px solid #667eea;
+      border-radius: 10px;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.3s;
+    }
+
+    .question-input:focus {
+      border-color: #764ba2;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .examples {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .example-btn {
+      padding: 8px 15px;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.3s;
+    }
+
+    .example-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .ask-btn {
+      width: 100%;
+      padding: 15px;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .ask-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .ask-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .response {
+      margin-top: 30px;
+      padding: 25px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .response-text {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .response-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.9em;
+      color: #666;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+    }
+
+    .response-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-size: 1.1em;
+      color: #667eea;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(102, 126, 234, 0.3);
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      opacity: 0.9;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.3s;
+    }
+
+    .footer a:hover {
+      opacity: 0.8;
+    }
+
+    .error {
+      background: #fee;
+      border-left-color: #f44;
+      color: #c33;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔥 RandomAiGirl RAG</h1>
+      <div class="subtitle">Universal Blockchain Knowledge Layer</div>
+      <div class="stats" id="stats">
+        <div class="stat">
+          <div class="stat-value" id="stat-wallets">-</div>
+          <div class="stat-label">Wallets Tracked</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-protocols">-</div>
+          <div class="stat-label">Protocols</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-patterns">-</div>
+          <div class="stat-label">Patterns</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="playground">
+      <input 
+        type="text" 
+        class="question-input" 
+        id="question"
+        placeholder="Ask me anything about blockchain... What are whales buying? New airdrops? Best yields?"
+      >
+      
+      <div class="examples">
+        <button class="example-btn" onclick="setQuestion('What are whales buying today?')">
+          🐋 Whale Activity
+        </button>
+        <button class="example-btn" onclick="setQuestion('Any new airdrops?')">
+          🪂 New Airdrops
+        </button>
+        <button class="example-btn" onclick="setQuestion('Best yields on Solana?')">
+          📈 Best Yields
+        </button>
+        <button class="example-btn" onclick="setQuestion('What protocols are trending?')">
+          🔥 Trending
+        </button>
+      </div>
+
+      <button class="ask-btn" onclick="askQuestion()" id="ask-btn">
+        Ask RandomAiGirl 🔥
+      </button>
+
+      <div id="response-container"></div>
+    </div>
+
+    <div class="footer">
+      <p>
+        Built by <a href="https://x.com/randomaigirl" target="_blank">@randomaigirl</a> 
+        · <a href="https://github.com/Randomaigirl/solana-agent-spawner" target="_blank">GitHub</a>
+        · Powered by RAG + Sass
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3001/api/rag';
+
+    // Load stats on page load
+    async function loadStats() {
+      try {
+        const response = await fetch(`${API_URL}/stats`);
+        const data = await response.json();
+        
+        document.getElementById('stat-wallets').textContent = data.totalWallets || 0;
+        document.getElementById('stat-protocols').textContent = data.totalProtocols || 0;
+        document.getElementById('stat-patterns').textContent = data.totalPatterns || 0;
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    }
+
+    // Set question from example
+    function setQuestion(text) {
+      document.getElementById('question').value = text;
+      document.getElementById('question').focus();
+    }
+
+    // Ask a question
+    async function askQuestion() {
+      const input = document.getElementById('question');
+      const question = input.value.trim();
+      
+      if (!question) {
+        alert('Please enter a question!');
+        return;
+      }
+
+      const btn = document.getElementById('ask-btn');
+      const container = document.getElementById('response-container');
+      
+      // Show loading
+      btn.disabled = true;
+      btn.textContent = 'Thinking...';
+      container.innerHTML = '<div class="loading"><div class="spinner"></div> Querying knowledge graph...</div>';
+
+      try {
+        const startTime = Date.now();
+        const response = await fetch(`${API_URL}/query`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await response.json();
+        const responseTime = Date.now() - startTime;
+
+        // Display response
+        const isError = !response.ok || data.error;
+        container.innerHTML = `
+          <div class="response ${isError ? 'error' : ''}">
+            <div class="response-text">
+              ${isError ? data.error || 'Something went wrong' : data.answer}
+            </div>
+            <div class="response-meta">
+              <span>⚡ ${responseTime}ms</span>
+              <span>📊 Confidence: ${data.confidence || 'N/A'}</span>
+              ${data.sources ? `<span>🔗 ${data.sources.length} sources</span>` : ''}
+            </div>
+          </div>
+        `;
+
+        // Reload stats (they might have updated)
+        loadStats();
+      } catch (error) {
+        container.innerHTML = `
+          <div class="response error">
+            <div class="response-text">
+              Failed to connect to the API. Make sure the server is running!
+            </div>
+          </div>
+        `;
+      }
+
+      // Reset button
+      btn.disabled = false;
+      btn.textContent = 'Ask RandomAiGirl 🔥';
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('question').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        askQuestion();
+      }
+    });
+
+    // Load stats on page load
+    loadStats();
+    // Refresh stats every 10 seconds
+    setInterval(loadStats, 10000);
+  </script>
+</body>
+</html>
